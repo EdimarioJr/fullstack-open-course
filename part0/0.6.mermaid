@@ -1,0 +1,35 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
+    activate server
+    server-->>browser: HTML document
+    deactivate server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    server-->>browser: the css file
+    deactivate server
+
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    activate server
+    server-->>browser: the JavaScript file
+    deactivate server
+
+    Note right of browser: The javascript is executed and makes a HTTP call
+    
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server-->>browser: [{ note: 'aa' }]
+    deactivate server
+
+    Note right of browser: The user types and submit the form
+
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note -> { "content": "single", "date": "2019-05-25T15:15:59.905Z"}
+    activate server
+    server-->>browser: Status code: 201 CREATED
+    deactivate server
+
+    Note right of browser: The callback on the js code is executed. The application mounts the new note on DOM.
+
