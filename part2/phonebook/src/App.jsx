@@ -4,12 +4,14 @@ import { PhonebookForm } from "./components/PhonebookForm";
 import { Persons } from "./components/Persons";
 import axios from "axios";
 import personsService from "./services/persons";
+import { NotificationMessage } from "./components/Notification";
 
 function App() {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [message, setMessage] = useState(null);
 
   const handleAddNewPerson = (event) => {
     event.preventDefault();
@@ -45,8 +47,15 @@ function App() {
       await personsService.update(person.id, data);
 
       getAllPersons();
+      setMessage({
+        type: "success",
+        message: `Success updating the number of ${data.name}`,
+      });
     } catch {
-      alert(`Error updating ${data.name}!`);
+      setMessage({
+        type: "error",
+        message: `Error updating ${data.name} data!`,
+      });
     }
   };
 
@@ -55,20 +64,29 @@ function App() {
       const response = await personsService.create(person);
 
       setPersons([...persons, response]);
+      setMessage({ type: "success", message: `Added ${newName}` });
       setNewName("");
       setNewNumber("");
     } catch {
-      alert("Error adding a new person!");
+      setMessage({ type: "error", message: "Error creating a new person!" });
     }
   };
 
   const deletePerson = async (id) => {
+    const person = persons.find((person) => person.id === id);
     try {
       await personsService.deletePerson(id);
 
       getAllPersons();
+      setMessage({
+        type: "success",
+        message: `${person.name} deleted.`,
+      });
     } catch {
-      alert(`Error updating deleting the person!`);
+      setMessage({
+        type: "error",
+        message: `Error deleting ${person.name}. Maybe this person has already been removed.`,
+      });
     }
   };
 
@@ -94,13 +112,20 @@ function App() {
       const data = response.data;
       setPersons(data);
     } catch {
-      alert("Error getting the list of persons!");
+      setMessage({
+        type: "error",
+        message: "Error getting the list of persons",
+      });
     }
   };
 
   useEffect(() => {
     getAllPersons();
   }, []);
+
+  useEffect(() => {
+    if (message?.message) setTimeout(() => setMessage(null), 3000);
+  }, [message?.message]);
 
   return (
     <div>
@@ -109,6 +134,12 @@ function App() {
         <p>Search by name:</p>
         <Search onChangeSearch={onChangeSearch} search={search} />
       </div>
+      {message && (
+        <NotificationMessage
+          className={message.type === "error" ? "error" : "success"}
+          message={message.message}
+        />
+      )}
 
       <PhonebookForm
         handleAddNewPerson={handleAddNewPerson}
